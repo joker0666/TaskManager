@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Pro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📋 Task Manager Pro</h1>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-value" id="totalTasks">{{ tasks|length }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="completedTasks">{{ tasks|selectattr('completed')|list|length }}</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="pendingTasks">{{ tasks|rejectattr('completed')|list|length }}</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Add Task Form -->
+    <form action="/add" method="POST" class="add-form">
+        <input type="text" name="task" placeholder="What needs to be done?" required>
+        
+        <select name="priority" class="priority-select">
+            <option value="3">🔴 High</option>
+            <option value="2" selected>🟡 Medium</option>
+            <option value="1">🟢 Low</option>
+        </select>
+        
+        <select name="category" class="category-select">
+            <option value="General">General</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Health">Health</option>
+        </select>
+        
+        <button type="submit">+ Add Task</button>
+    </form>
+
+    <!-- Filter and Actions -->
+    <div class="controls">
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All Tasks</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+        
+        {% if tasks|selectattr('completed')|list|length > 0 %}
+        <form action="/clear_completed" method="POST" style="display: inline;">
+            <button type="submit" class="clear-btn" onclick="return confirm('Clear all completed tasks?')">
+                🗑️ Clear Completed
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Tasks List -->
+    <div class="tasks-container">
+        {% if tasks|length == 0 %}
+        <div class="empty-state">
+            <p>🎉 No tasks yet! Add one to get started.</p>
+        </div>
+        {% else %}
+            {% for task in tasks %}
+            <div class="task-card {{ 'completed' if task.completed }}" data-status="{{ 'completed' if task.completed else 'pending' }}">
+                <div class="task-header">
+                    <div class="task-main">
+                        <button class="check-btn {{ 'checked' if task.completed }}" 
+                                onclick="window.location.href='/complete/{{ task.id }}'">
+                            {{ '✓' if task.completed else '' }}
+                        </button>
+                        <div class="task-info">
+                            <h3 class="task-title">{{ task.title }}</h3>
+                            <div class="task-meta">
+                                <span class="priority priority-{{ task.priority }}">
+                                    {{ '🔴 High' if task.priority == 3 else '🟡 Medium' if task.priority == 2 else '🟢 Low' }}
+                                </span>
+                                <span class="category">{{ task.category }}</span>
+                                <span class="timestamp">{{ task.created_at }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-icon edit-btn" onclick="openEdit({{ task.id }}, '{{ task.title }}', {{ task.priority }}, '{{ task.category }}')" title="Edit">
+                            ✏️
+                        </button>
+                        <button class="btn-icon delete-btn" onclick="if(confirm('Delete this task?')) window.location.href='/delete/{{ task.id }}'" title="Delete">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ Edit Task</h3>
+            <button class="close-btn" onclick="closeEdit()">&times;</button>
+        </div>
+        <form id="editForm" method="POST">
+            <div class="form-group">
+                <label>Task Title</label>
+                <input type="text" id="editInput" name="new_title" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Priority</label>
+                <select name="new_priority" id="editPriority" class="priority-select">
+                    <option value="3">🔴 High</option>
+                    <option value="2">🟡 Medium</option>
+                    <option value="1">🟢 Low</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <select name="new_category" id="editCategory" class="category-select">
+                    <option value="General">General</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Health">Health</option>
+                </select>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <button type="button" class="btn-cancel" onclick="closeEdit()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
