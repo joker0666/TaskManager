@@ -120,9 +120,27 @@ jobs:
       run: |
         echo "Checking application structure..."
         ls -la
-        if [ -f main.py ]; then echo "✓ main.py found"; else echo "✗ main.py missing"; exit 1; fi
-        if [ -d templates ]; then echo "✓ templates/ found"; else echo "✗ templates/ missing"; exit 1; fi
-        if [ -d static ]; then echo "✓ static/ found"; else echo "✗ static/ missing"; exit 1; fi
+        # Check for either root level or app/ directory structure
+        if [ -f main.py ] || [ -f app/main.py ]; then 
+          echo "✓ main.py found"
+        else 
+          echo "✗ main.py missing"
+          exit 1
+        fi
+        
+        if [ -d templates ] || [ -d app/templates ]; then 
+          echo "✓ templates/ found"
+        else 
+          echo "✗ templates/ missing"
+          exit 1
+        fi
+        
+        if [ -d static ] || [ -d app/static ]; then 
+          echo "✓ static/ found"
+        else 
+          echo "✗ static/ missing"
+          exit 1
+        fi
     
     - name: Create artifact
       run: |
@@ -154,14 +172,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+      continue-on-error: true
     
     - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: false
-        tags: ${{ secrets.DOCKER_USERNAME }}/task-manager:${{ github.sha }}
+        tags: task-manager:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
     
@@ -173,7 +192,8 @@ jobs:
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/task-manager:latest
           ${{ secrets.DOCKER_USERNAME }}/task-manager:${{ github.sha }}
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+      continue-on-error: true
 
   deploy:
     runs-on: ubuntu-latest
