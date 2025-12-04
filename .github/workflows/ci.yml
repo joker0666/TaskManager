@@ -144,9 +144,16 @@ jobs:
     
     - name: Create artifact
       run: |
-        mkdir -p build
-        cp -r . build/
-        cd build && tar -czf ../task-manager-app.tar.gz .
+        tar -czf task-manager-app.tar.gz \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='*.tar.gz' \
+          --exclude='__pycache__' \
+          --exclude='*.pyc' \
+          --exclude='.pytest_cache' \
+          --exclude='htmlcov' \
+          --exclude='.coverage' \
+          .
     
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
