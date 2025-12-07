@@ -35,7 +35,7 @@ def add_task():
 @app.route("/delete/<int:task_id>")
 def delete_task(task_id):
     global tasks
-    tasks = [t for t in tasks if t["id"] != task_id]
+    tasks[:] = [t for t in tasks if t["id"] != task_id]
     return redirect("/")
 
 @app.route("/complete/<int:task_id>")
@@ -64,7 +64,7 @@ def edit_task(task_id):
 @app.route("/clear_completed", methods=["POST"])
 def clear_completed():
     global tasks
-    tasks = [t for t in tasks if not t["completed"]]
+    tasks[:] = [t for t in tasks if not t["completed"]]
     return redirect("/")
 
 @app.route("/stats")

@@ -2,17 +2,10 @@ import pytest
 import sys
 import os
 
-# Add app directory to path if main.py is in app/ folder
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
+# Add app directory to path since main.py is in app/ folder
+sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 
-# If main.py is in root, use this instead:
-# from main import app, tasks
-
-# If main.py is in app/ folder, use this:
-try:
-    from main import app, tasks
-except ImportError:
-    from app.main import app, tasks
+from main import app, tasks
 
 
 @pytest.fixture
@@ -26,9 +19,12 @@ def client():
 @pytest.fixture(autouse=True)
 def clear_tasks():
     """Clear tasks before and after each test"""
+    import main
     tasks.clear()
+    main.task_id_counter = 0
     yield
     tasks.clear()
+    main.task_id_counter = 0
 
 
 class TestHomePage:
