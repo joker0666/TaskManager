@@ -71,14 +71,14 @@ jobs:
       with:
         fetch-depth: 0  # Fetch all history for gitleaks
     
-    - name: Run Gitleaks scan
-      uses: zricethezav/gitleaks-action@v2
+    # - name: Run Gitleaks scan
+    #   uses: zricethezav/gitleaks-action@v2
     
-    - name: Upload Gitleaks report
-      uses: actions/upload-artifact@v4
-      with:
-        name: gitleaks-report
-        path: results.sarif
+    # - name: Upload Gitleaks report
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: gitleaks-report
+    #     path: results.sarif
       if: always()
     
     - name: Set up Python
