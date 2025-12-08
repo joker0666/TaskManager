@@ -1,7 +1,14 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from datetime import datetime
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
+
+# Initialize Prometheus metrics
+metrics = PrometheusMetrics(app)
+
+# Add custom metrics
+metrics.info('flask_app_info', 'Application info', version='1.0.0')
 
 # Enhanced tasks with more fields
 tasks = []
@@ -83,6 +90,16 @@ def get_stats():
         "total": total,
         "completed": completed,
         "pending": pending
+    })
+
+
+@app.route("/health")
+def health():
+    """Health check endpoint for monitoring"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "tasks_count": len(tasks)
     })
 
 
