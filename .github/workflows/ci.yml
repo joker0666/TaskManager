@@ -308,10 +308,7 @@ jobs:
         echo "Build completed successfully!"
     
     # Add your deployment steps here
-    # Examples:
-    # - Deploy to Heroku
-    # - Deploy to AWS
-    # - Deploy to Azure
+
     # - Deploy to your own server via SSH
 
   notify:
